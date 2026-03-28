@@ -43,7 +43,7 @@ public:
         centerDown.y = dispHeight;
         updateTextSize();
     }
-    void printToDisplay(Point x, char str[8], bool clean = true)
+    void printToDisplay(Point x, char* str, bool clean = true)
     {
         if (clean)
         {
@@ -61,6 +61,19 @@ public:
         }
         display.setCursor(x.x, x.y);
         display.println(str);
+        display.display();
+    }
+    void printRadar(uint16_t radius)
+    {
+        printRadar(radius, centerDown);
+    }
+    void printRadar(uint16_t radius, Point point, bool clean=true)
+    {
+        if (clean)
+        {
+            display.clearDisplay();
+        }
+        display.drawCircle(point.x, point.y, radius, WHITE);
         display.display();
     }
     void setTextSize(uint8_t x)
