@@ -34,14 +34,33 @@ public:
         }
         return distance;
     }
-    void setLaserRange(uint16_t x)
+    void setLongRange(bool enable)
     {
-        sensor.setMeasurementTimingBudget(x * 100);
-        timeForLaser = x;
+        if (enable)
+        {
+            //max current scan distance ~1,8m-slow
+            //max max scan distance ~2m-very slow sensor.setSignalRateLimit(0.05);sensor.setMeasurementTimingBudget(1000000);
+            sensor.setSignalRateLimit(0.065);
+            sensor.setMeasurementTimingBudget(600000);
+            sensor.setVcselPulsePeriod(VL53L0X::VcselPeriodPreRange, 18);
+            sensor.setVcselPulsePeriod(VL53L0X::VcselPeriodFinalRange, 14);
+        }
+        else
+        {
+            sensor.setSignalRateLimit(0.25);
+            sensor.setMeasurementTimingBudget(timeForLaser);
+            sensor.setVcselPulsePeriod(VL53L0X::VcselPeriodPreRange, 14);
+            sensor.setVcselPulsePeriod(VL53L0X::VcselPeriodFinalRange, 10);
+        }
+    }
+    uint8_t getError()
+    {
+        return sensor.last_status;
     }
     void setTimeForLaser(uint16_t x)
     {
         timeForLaser = x;
+        sensor.setMeasurementTimingBudget(x);
     }
     uint16_t getTimeForLaser()
     {

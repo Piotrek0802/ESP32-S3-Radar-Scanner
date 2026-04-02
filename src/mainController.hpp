@@ -69,11 +69,16 @@ public:
         {
             x = 500;
         }
-
-        screen.setTextSize(5);
         for (size_t i = 0; i < x; i++)
         {
-            screen.printToDisplay(DefaultPoints::Center, laser.getReading());
+            screen.setTextSize(1);
+            screen.updateTextSize();
+            screen.printToDisplay(DefaultPoints::LeftTop, true, true);
+            screen.printToDisplay(DefaultPoints::RightTop.withOffset(-10), laser.getError(), false);
+            laser.setLongRange(true);
+            screen.setTextSize(2);
+            screen.updateTextSize();
+            screen.printToDisplay(DefaultPoints::Center, laser.getReading(), false);
             delay(200);
         }
     }

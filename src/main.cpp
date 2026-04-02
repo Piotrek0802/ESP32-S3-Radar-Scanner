@@ -15,6 +15,6 @@ void loop()
 {
   controller.testSimpleText(3);
   controller.testCircle(3);
-  //controller.testLaserReading(500);//need to fix
+  controller.testLaserReading(500);
   controller.testJoystick();
 }
