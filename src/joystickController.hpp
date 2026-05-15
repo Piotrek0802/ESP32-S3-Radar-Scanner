@@ -10,7 +10,12 @@ private:
     uint16_t _deadZoneYmax = 0;
     uint16_t _inputX = 0;
     uint16_t _inputY = 0;
+    int32_t _defaultX = 2048;
+    int32_t _defaultY = 2048;
     bool _isPressed = false;
+    bool _isButtonDoubleClicked = false;
+
+    unsigned long lastButtonPressed;
 
 public:
     joystickController(uint8_t pinX1, uint8_t pinY1, uint8_t pinButton1) : pinX(pinX1), pinY(pinY1), pinButton(pinButton1)
@@ -35,6 +40,7 @@ public:
     uint16_t getInputX() const { return _inputX; }
     uint16_t getInputY() const { return _inputY; }
     bool isPressed() const { return _isPressed; }
+    bool isDoubleClicked() const { return _isButtonDoubleClicked; }
 
     // --- Settery (z prostą walidacją dla bezpieczeństwa) ---
     void setDeadZoneX(uint16_t val) { _deadZoneX = val; }
@@ -43,7 +49,7 @@ public:
     // Settery dla wejść (używane przez funkcję odczytującą piny)
     void setInputX(int32_t val)
     {
-        if (abs(val - 2048) < _deadZoneX)
+        if (abs(val - _defaultX) < _deadZoneX)
         {
             _inputX = 2048;
         }
@@ -57,16 +63,23 @@ public:
         }
         else
         {
-            _inputX = val;
+            if (val <= _defaultX)
+            {
+                _inputX = map(val, 0, _defaultX, _deadZoneXmax, 2048);
+            }
+            else
+            {
+                _inputX = map(val, _defaultX, 4095, 2048+_deadZoneX, 4095-_deadZoneXmax);
+            }
         }
-        //Serial.print("JoystickController.X: ");
-        //Serial.println(val+"  "+_inputX);
+        // Serial.print("JoystickController.X: ");
+        // Serial.println(val+"  "+_inputX);
     }
     void setInputY(int32_t val)
     {
-        if (abs(val - 2048) < _deadZoneY)
+        if (abs(val - _defaultY) < _deadZoneY)
         {
-            _inputY = 2048;
+            _inputY = _defaultY;
         }
         else if (val > 4095 - _deadZoneYmax)
         {
@@ -80,9 +93,32 @@ public:
         {
             _inputY = val;
         }
-        //Serial.print("JoystickController.Y: ");
-        //Serial.println(val+"  "+_inputY);
+        // Serial.print("JoystickController.Y: ");
+        // Serial.println(val+"  "+_inputY);
     }
 
-    void setIsPressed(bool state) { _isPressed = state; }
+    void setIsPressed(bool state)
+    {
+        _isPressed = state;
+        _isButtonDoubleClicked = false;
+        if (state)
+        {
+            if (millis() - lastButtonPressed < 750 && millis() - lastButtonPressed > 100)
+            {
+                _isButtonDoubleClicked = true;
+            }
+            lastButtonPressed = millis();
+        }
+    }
+
+    void setDefaultAxes()
+    {
+        long int x = millis();
+        while (millis() - x < 2500)
+        {
+            /* code */
+        }
+        _defaultX = analogRead(pinX);
+        _defaultY = analogRead(pinY);
+    }
 };

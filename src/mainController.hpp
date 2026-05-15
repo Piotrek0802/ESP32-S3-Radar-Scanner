@@ -29,6 +29,10 @@ public:
         screen.start();
         laser.start();
     }
+    void radarLaser()
+    {
+        
+    }
     void testCircle(uint16_t x = 25)
     {
         if (x > 50)
@@ -87,7 +91,7 @@ public:
         joystickController joystick(6, 5, 4);
         screen.setTextSize(2);
         screen.updateTextSize();
-        while (joystick.isPressed() == false)
+        while (true)//joystick.isPressed() == false)
         {
             joystick.update();
             screen.printToDisplay(DefaultPoints::CenterLeft, joystick.getInputX(), true);
@@ -96,13 +100,21 @@ public:
             Serial.println(joystick.getInputX());
             Serial.print("Joystick.Y: ");
             Serial.println(joystick.getInputY());
+
+            if (joystick.isDoubleClicked())
+            {
+                joystick.setDefaultAxes();
+            }
             delay(50);
         }
+        
         screen.setTextSize(3);
         screen.updateTextSize();
         screen.printToDisplay(DefaultPoints::Center.withOffset(-62), "Pressed");
         screen.setTextSize(1);
         screen.updateTextSize();
         delay(5000);
+        
+       
     }
 };
