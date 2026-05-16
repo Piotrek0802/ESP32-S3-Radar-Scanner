@@ -4,8 +4,8 @@ class joystickController
 {
 private:
     const uint8_t pinX, pinY, pinButton;
-    uint16_t _deadZoneX = 25;
-    uint16_t _deadZoneY = 25;
+    uint16_t _deadZoneX = 125;
+    uint16_t _deadZoneY = 125;
     uint16_t _deadZoneXmax = 0;
     uint16_t _deadZoneYmax = 0;
     uint16_t _inputX = 0;
@@ -37,8 +37,18 @@ public:
     uint16_t getDeadZoneY() const { return _deadZoneY; }
     uint16_t getDeadZoneXmax() const { return _deadZoneXmax; }
     uint16_t getDeadZoneYmax() const { return _deadZoneYmax; }
-    uint16_t getInputX() const { return _inputX; }
-    uint16_t getInputY() const { return _inputY; }
+    uint16_t getInputX() const
+    {
+        Serial.print("Joystick.X: ");
+        Serial.println(_inputX);
+        return _inputX;
+    }
+    uint16_t getInputY() const
+    {
+        Serial.print("Joystick.Y: ");
+        Serial.println(_inputY);
+        return _inputY;
+    }
     bool isPressed() const { return _isPressed; }
     bool isDoubleClicked() const { return _isButtonDoubleClicked; }
 
@@ -69,7 +79,7 @@ public:
             }
             else
             {
-                _inputX = map(val, _defaultX, 4095, 2048+_deadZoneX, 4095-_deadZoneXmax);
+                _inputX = map(val, _defaultX, 4095, 2048 + _deadZoneX, 4095 - _deadZoneXmax);
             }
         }
         // Serial.print("JoystickController.X: ");
@@ -96,7 +106,6 @@ public:
         // Serial.print("JoystickController.Y: ");
         // Serial.println(val+"  "+_inputY);
     }
-
     void setIsPressed(bool state)
     {
         _isPressed = state;
@@ -110,7 +119,6 @@ public:
             lastButtonPressed = millis();
         }
     }
-
     void setDefaultAxes()
     {
         long int x = millis();

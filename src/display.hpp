@@ -21,6 +21,7 @@ public:
     }
     ~Display() {}
 
+    // metody
     void start()
     {
         if (display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
@@ -41,49 +42,51 @@ public:
         rightUp.y = 0;
         centerDown.x = dispWidth / 2;
         centerDown.y = dispHeight;
-        updateTextSize();
+        // updateTextSize();//obecnie nie ma tego
     }
-    void printToDisplay(Point x, char* str, bool clean = true)
+    void printToDisplay(Point x,const char *str)
     {
-        if (clean)
-        {
-            display.clearDisplay();
-        }
         display.setCursor(x.x, x.y);
         display.println(str);
-        display.display();
     }
-    void printToDisplay(Point x, int str, bool clean = true)
+    void printToDisplay(Point x, int str)
     {
-        if (clean)
-        {
-            display.clearDisplay();
-        }
         display.setCursor(x.x, x.y);
         display.println(str);
-        display.display();
     }
     void printRadar(uint16_t radius)
     {
         printRadar(radius, centerDown);
     }
-    void printRadar(uint16_t radius, Point point, bool clean=true)
+    void printRadar(uint16_t radius, Point point)
     {
-        if (clean)
-        {
-            display.clearDisplay();
-        }
         display.drawCircle(point.x, point.y, radius, WHITE);
+    }
+    void printTriangle(Point a, Point b, Point c)
+    {
+        display.fillTriangle(a.x, a.y, b.x, b.y, c.x, c.y, SSD1306_WHITE);
+    }
+    void clear()
+    {
+        display.clearDisplay();
+    }
+    void show()
+    {
         display.display();
     }
+
+    // gettery i settery
     void setTextSize(uint8_t x)
     {
         textSize = x;
+        display.setTextSize(x);
     }
     uint8_t getTextSize()
     {
         return textSize;
     }
+
+    /*//narazie zbedne
     void setRealTextSize(uint8_t x)
     {
         realTextSize = x;
@@ -97,4 +100,5 @@ public:
         display.setTextSize(textSize);
         realTextSize = textSize;
     }
+    */
 };
