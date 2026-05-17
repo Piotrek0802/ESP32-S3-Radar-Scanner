@@ -89,7 +89,7 @@ public:
     {
         if (abs(val - _defaultY) < _deadZoneY)
         {
-            _inputY = _defaultY;
+            _inputY = 2048;
         }
         else if (val > 4095 - _deadZoneYmax)
         {
@@ -101,7 +101,14 @@ public:
         }
         else
         {
-            _inputY = val;
+            if (val <= _defaultY)
+            {
+                _inputY = map(val, 0, _defaultY, _deadZoneYmax, 2048);
+            }
+            else
+            {
+                _inputY = map(val, _defaultY, 4095, 2048 + _deadZoneY, 4095 - _deadZoneYmax);
+            }
         }
         // Serial.print("JoystickController.Y: ");
         // Serial.println(val+"  "+_inputY);

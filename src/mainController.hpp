@@ -30,7 +30,7 @@ private:
     uint8_t textSize = 1;
     uint8_t radarRadius = 53;
     uint8_t servoYAngle = 90;
-    uint8_t maxRadarLeftRight=45;
+    int8_t maxRadarLeftRight = 45;
     uint16_t maxRead = 2000;
     uint16_t autoRadarPeriod = 40000;
     double angleX = 90, angleY = 90;
@@ -74,12 +74,13 @@ public:
         for (size_t i = 0; i < x; i++)
         {
             screen.printRadar(64 - 26 + i);
-            screen.printToDisplay(DefaultPoints::CenterDown.withOffset(0, -10), 64 - 26 + i, false);
-            screen.printToDisplay(DefaultPoints::LeftTop, i, false);
-            screen.printToDisplay(DefaultPoints::RightTop.withOffset(-18, 0), 100 - i, false);
+            screen.printToDisplay(DefaultPoints::CenterDown.withOffset(0, -10), 64 - 26 + i);
+            screen.printToDisplay(DefaultPoints::LeftTop, i);
+            screen.printToDisplay(DefaultPoints::RightTop.withOffset(-18, 0), 100 - i);
             delay(1000);
         }
     }
+        */
     void testSimpleText(uint16_t x = 26)
     {
         if (x > 26)
@@ -91,14 +92,15 @@ public:
         point1.y = 10;
         for (int i = 0; i < x; i++)
         {
+            screen.clear();
             char str[3]{'0', '0', '0'};
-            screen.printToDisplay(point, i, true);
+            screen.printToDisplay(point, i);
             str[2] = static_cast<char>(i + 'A');
-            screen.printToDisplay(point1, str, false);
+            screen.printToDisplay(point1, str);
+            screen.show();
             delay(750);
         }
     }
-    */
     void testLaserReading(uint16_t x = 10)
     {
         if (x > 500)
@@ -118,17 +120,15 @@ public:
             delay(200);
         }
     }
-    /*
     void testJoystick()
     {
-        joystick= new joystickController(6, 5, 4);
-        screen.setTextSize(2);
-        screen.updateTextSize();
+        joystick = new joystickController(4, 5, 6);
+        // screen.setTextSize(2);
         while (true) // joystick.isPressed() == false)
         {
             joystick->update();
-            screen.printToDisplay(DefaultPoints::CenterLeft, joystick->getInputX(), true);
-            screen.printToDisplay(DefaultPoints::Center, joystick->getInputY(), false);
+            // screen.printToDisplay(DefaultPoints::CenterLeft, joystick->getInputX());
+            // screen.printToDisplay(DefaultPoints::Center, joystick->getInputY(),);
             Serial.print("Joystick.X: ");
             Serial.println(joystick->getInputX());
             Serial.print("Joystick.Y: ");
@@ -141,18 +141,17 @@ public:
             delay(50);
         }
 
-        screen.setTextSize(3);
-        screen.updateTextSize();
-        screen.printToDisplay(DefaultPoints::Center.withOffset(-62), "Pressed");
-        screen.setTextSize(1);
-        screen.updateTextSize();
-        delay(5000);
+        // screen.setTextSize(3);
+        // screen.updateTextSize();
+        // screen.printToDisplay(DefaultPoints::Center.withOffset(-62), "Pressed");
+        // screen.setTextSize(1);
+        // screen.updateTextSize();
+        // delay(5000);
     }
-    */
 
     void radar()
     {
-        joystick = new joystickController(5, 6, 4); // ustawienia na ktorym pinie jest osX/Y i button
+        joystick = new joystickController(5, 4, 6); // ustawienia na ktorym pinie jest osX/Y i button
 
         joystick->setDefaultAxes();
 
@@ -189,14 +188,14 @@ public:
 
             // ---RADAR---
             laser.setLongRange(false);
-            readings.at(int(map(angleX, 0, 180, 0, resolution - 1))) = laser.getReading();
-            
+            readings.at(int(map(angleX, 0, 180, 0, resolution - 1))) = constrain(laser.getReading(), 0, maxRead);
+
             // ---JOYSTICK---
             joystick->update();
             if (isAutomaticScanning)
             {
                 angleX = linearWave(millis(), autoRadarPeriod, 180);
-                angleX=map(angleX,0,180,90-maxRadarLeftRight,90+maxRadarLeftRight);
+                angleX = map(angleX, 0, 180, 90 - maxRadarLeftRight, 90 + maxRadarLeftRight);
                 mySerwoX->setAngle(angleX); // <---AUTO RADAR---
                 myServoY->setAngle(servoYAngle);
             }
@@ -229,7 +228,7 @@ public:
             "4. Automatic scanning",
             "5. Ustaw serwoY",
             "6. Reset pamieci",
-            "7. Opcja 7",
+            "7. Max radar angle 90+-X",
             "8. Opcja 8",
             "9. Opcja 9"};
         int8_t choice = 0;
@@ -354,9 +353,29 @@ public:
                     } while (joystick->isPressed() == false);
                     choice = 0;
                     break;
-                    case 6:
+                case 6:
                     readings.clear();
+                    screen.clear();
+                    screen.printToDisplay(DefaultPoints::CenterLeft, "Wyczysczono pamiec");
+                    screen.show();
+                    delay(1500);
                     break;
+                case 7:
+                    do
+                    {
+                        screen.clear();
+                        screen.printToDisplay(DefaultPoints::CenterLeft, "Obrot 90*+- ");
+                        screen.printToDisplay(DefaultPoints::CenterLeft.withOffset(12 * 6), maxRadarLeftRight);
+                        screen.show();
+
+                        joystick->update();
+                        maxRadarLeftRight += (joystick->getInputY()-2048) * sensitivity / 1000 * (millis() - lastTime);
+                        maxRadarLeftRight = constrain(maxRadarLeftRight, 0, 90);
+                        lastTime = millis();
+                    } while (joystick->isPressed() == false);
+                    delay(350);
+                    break;
+
                 default:
                     break;
                 }
